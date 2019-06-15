@@ -75,6 +75,14 @@ class SiamFC():
 	def net(self, z, x):
 		z = self.alexnet(z)
 		x = self.alexnet(x)
+		# fast cross correlation
+        n, c, h, w = x.size()
+        x = x.view(1, n * c, h, w)
+        out = F.conv2d(x, z, groups=n)
+        out = out.view(n, 1, out.size(-2), out.size(-1))
+
+        # adjust the scale of responses
+        out = 0.001 * out + 0.0
 
 class TrackerSiamFc():
 
