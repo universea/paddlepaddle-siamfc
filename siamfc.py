@@ -31,39 +31,39 @@ class SiamFC():
 	    return conv
 
     def alexnet(self, input):
-        conv1 = conv_bn_layer(input=input, 
+        conv1 = self.conv_bn_layer(input=input, 
 			num_filters=96, 
 			filter_size=11, 
 			stride=2, 
 			act='relu')
-		conv1 = fluid.layers.pool2d(
+		conv1 = self.fluid.layers.pool2d(
 			input=conv1, 
 			pool_size=3, 
 			pool_stride=2, 
 			pool_type='max')
-		conv2 = conv_bn_layer(input=conv1, 
+		conv2 = self.conv_bn_layer(input=conv1, 
 			num_filters=256, 
 			filter_size=5, 
 			stride=1, 
 			groups=2,
 			act='relu')
-		conv2 = fluid.layers.pool2d(
+		conv2 = self.fluid.layers.pool2d(
 			input=conv2, 
 			pool_size=3, 
 			pool_stride=2, 
 			pool_type='max')
-        conv3 = conv_bn_layer(input=conv2, 
+        conv3 = self.conv_bn_layer(input=conv2, 
 			num_filters=384, 
 			filter_size=3, 
 			stride=1, 
 			act='relu')
-		conv4 = conv_bn_layer(input=conv3, 
+		conv4 = self.conv_bn_layer(input=conv3, 
 			num_filters=384, 
 			filter_size=3, 
 			stride=1, 
 			groups=2,
 			act='relu')
-		conv5 = conv_bn_layer(input=conv4, 
+		conv5 = self.conv_bn_layer(input=conv4, 
 			num_filters=256, 
 			filter_size=3, 
 			stride=1, 
