@@ -11,13 +11,11 @@ import cv2
 from collections import namedtuple
 
 class SiamFC():
-
-    def __init__(self):
-        super(SiamFC, self).__init__()
-
+	def __init__(self):
+		super(SiamFC, self).__init__()
 	def conv_bn_layer(self, input, num_filters, filter_size, stride=1, groups=1, act=None, bn=True, bias_attr=False):
-	    conv = fluid.layers.conv2d(
-		    input=input,
+		conv = fluid.layers.conv2d(
+            input=input,
 		    num_filters=num_filters,
 		    filter_size=filter_size,
 		    stride=stride,
@@ -26,17 +24,17 @@ class SiamFC():
 		    act=None,
 		    bias_attr=bias_attr,
 		    param_attr=ParamAttr(initializer=MSRA()))
-	    if bn == True:
-		  conv = fluid.layers.batch_norm(input=conv, act=act, momentum=0.05)
-	    return conv
+		if bn == True:
+			conv = fluid.layers.batch_norm(input=conv, act=act, momentum=0.05)
+		return conv
 
-    def alexnet(self, input):
-        conv1 = self.conv_bn_layer(input=input, 
+	def alexnet(self, input):
+		conv1 = self.conv_bn_layer(input=input, 
 			num_filters=96, 
 			filter_size=11, 
 			stride=2, 
 			act='relu')
-		conv1 = self.fluid.layers.pool2d(
+		conv1 = fluid.layers.pool2d(
 			input=conv1, 
 			pool_size=3, 
 			pool_stride=2, 
@@ -47,12 +45,12 @@ class SiamFC():
 			stride=1, 
 			groups=2,
 			act='relu')
-		conv2 = self.fluid.layers.pool2d(
+		conv2 = fluid.layers.pool2d(
 			input=conv2, 
 			pool_size=3, 
 			pool_stride=2, 
 			pool_type='max')
-        conv3 = self.conv_bn_layer(input=conv2, 
+		conv3 = self.conv_bn_layer(input=conv2, 
 			num_filters=384, 
 			filter_size=3, 
 			stride=1, 
@@ -70,22 +68,30 @@ class SiamFC():
 			groups=2,
 			act='relu')
 		out = conv5
-        return out
+		return out
 
 	def net(self, z, x):
+		print(z.shape)
+		print(x.shape)
 		z = self.alexnet(z)
 		x = self.alexnet(x)
-		# fast cross correlation
-        n, c, h, w = x.size()
-        x = x.view(1, n * c, h, w)
-        out = F.conv2d(x, z, groups=n)
-        out = out.view(n, 1, out.size(-2), out.size(-1))
-
-        # adjust the scale of responses
-        out = 0.001 * out + 0.0
+		print(z.shape)
+		print(x.shape)
+		nz, cz, hz, wz = np.array(x.shape)
+		nx, cx, hx, wx = np.array(x.shape)
+		out = fluid.layers.conv2d(x,z,groups=2)
 
 class TrackerSiamFc():
 
    def __init__(self, net_path=None, **kargs):
         super(TrackerSiamFC, self).__init__(
             name='SiamFC', is_deterministic=True)
+
+
+if __name__ == '__main__':
+
+	z = fluid.layers.data(name='z', shape=[3,127,127], dtype='float32')
+	x = fluid.layers.data(name='x', shape=[3,255,255],dtype='float32')
+
+	siamfc = SiamFC()
+	siamfc.net(z,x)
